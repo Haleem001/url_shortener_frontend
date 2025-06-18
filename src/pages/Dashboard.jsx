@@ -56,7 +56,8 @@ const Dashboard = () => {
       setSuccess('URL shortened successfully!');
     },
     onError: (error) => {
-      setError(error.response?.data?.detail || 'Failed to shorten URL');
+      setError(error.response?.data?.original_url || 'Failed to shorten URL');
+      console.error('Error shortening URL:', error);
       setShortenedUrl('');
     },
   });

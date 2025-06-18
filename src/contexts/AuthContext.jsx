@@ -32,6 +32,7 @@ export const AuthProvider = ({ children }) => {
       setUser(decoded);
       return true;
     } catch (error) {
+      console.error('Login error:', error);
       throw error;
     }
   };

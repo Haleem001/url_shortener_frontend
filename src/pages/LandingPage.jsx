@@ -41,16 +41,29 @@ const LandingPage = () => {
     setError('');
     setSuccess('');
 
-    try {
-      const response = await urlAPI.shorten({
-        original_url: url,
-        custom_code: customCode || undefined,
-      });
-      setShortenedUrl(response.data.short_url);
-      setSuccess('URL shortened successfully!');
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to shorten URL');
-    }
+const getErrorMessage = (status, defaultMessage) => {
+  const errorMessages = {
+    400: 'Bad Request: Please check your URL format or custom code',
+    429: 'Rate limit exceeded: Please try again later',
+  };
+  return errorMessages[status] || defaultMessage;
+};
+
+try {
+  const response = await urlAPI.shorten({
+    original_url: url,
+    custom_code: customCode || undefined,
+  });
+  setShortenedUrl(response.data.short_url);
+  setSuccess('URL shortened successfully!');
+} catch (err) {
+  const errorMessage = getErrorMessage(
+    err.response?.status,
+    err.response?.data?.error || 'Failed to shorten URL'
+  );
+  setError(errorMessage);
+  console.error('Error shortening URL:', err);
+};
   };
 
   const handleCopy = () => {
