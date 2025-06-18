@@ -109,7 +109,7 @@ function App() {
                   </PrivateRoute>
                 }
               />
-              <Route
+              {/* <Route
                 path="/analytics"
                 element={
                   <PrivateRoute>
@@ -118,7 +118,7 @@ function App() {
                     </Layout>
                   </PrivateRoute>
                 }
-              />
+              /> */}
               <Route
                 path="/profile"
                 element={

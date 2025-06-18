@@ -213,7 +213,7 @@ const Dashboard = () => {
                   <TableCell>Short URL</TableCell>
                   <TableCell>Created</TableCell>
                   <TableCell>Visits</TableCell>
-                  <TableCell align="right">Actions</TableCell>
+                  <TableCell align="right">View QR code</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -269,19 +269,7 @@ const Dashboard = () => {
                           <QrCodeIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="Edit">
-                        <IconButton size="small">
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleDelete(url.short_code)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                     
                     </TableCell>
                   </TableRow>
                 ))}

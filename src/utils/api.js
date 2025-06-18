@@ -86,6 +86,8 @@ export const urlAPI = {
   getStats: (shortCode) => api.get(`/stats/${shortCode}/`),
   getAnalytics: (shortCode) => api.get(`/analytics/${shortCode}/`),
   getQRCode: (shortCode) => api.get(`/qr/${shortCode}/`, { responseType: 'blob' }),
+  getUserStats: () => api.get('/user/stats/'),
+
 };
 
 export default api; 

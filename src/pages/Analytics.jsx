@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Box,
@@ -8,46 +7,31 @@ import {
   Grid,
   Card,
   CardContent,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   CircularProgress,
+  LinearProgress,
 } from '@mui/material';
 import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  Legend,
   BarChart,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
 } from 'recharts';
 import { urlAPI } from '../utils/api';
 
 const COLORS = ['#1a472a', '#2d8659', '#4caf50', '#81c784', '#a5d6a7'];
 
 const Analytics = () => {
-  const [timeRange, setTimeRange] = useState('7d');
-
-  const { data: analytics, isLoading } = useQuery({
-    queryKey: ['analytics', timeRange],
-    queryFn: () => urlAPI.getAnalytics(timeRange).then((res) => res.data),
+  const { data: userStats, isLoading } = useQuery({
+    queryKey: ['userStats'],
+    queryFn: () => urlAPI.getUserStats().then((res) => res.data),
   });
-
-  const totalClicks = analytics?.total_clicks || 0;
-  const uniqueVisitors = analytics?.unique_visitors || 0;
-  const averageClicks = analytics?.average_clicks || 0;
-  const topUrls = analytics?.top_urls || [];
-  const clicksByDay = analytics?.clicks_by_day || [];
-  const clicksByCountry = analytics?.clicks_by_country || [];
-  const clicksByDevice = analytics?.clicks_by_device || [];
 
   if (isLoading) {
     return (
@@ -64,6 +48,36 @@ const Analytics = () => {
       </Box>
     );
   }
+
+  const totalUrls = userStats?.total_urls || 0;
+  const totalActiveUrls = userStats?.total_active_urls || 0;
+  const totalVisits = userStats?.total_visits || 0;
+  const quotaUsed = userStats?.quota_used || 0;
+  const quotaLimit = userStats?.quota_limit || 100;
+
+  // Calculate derived metrics
+  const inactiveUrls = totalUrls - totalActiveUrls;
+  const averageVisitsPerUrl = totalUrls > 0 ? (totalVisits / totalUrls).toFixed(1) : 0;
+  const quotaUsagePercentage = quotaLimit > 0 ? (quotaUsed / quotaLimit) * 100 : 0;
+  const remainingQuota = quotaLimit - quotaUsed;
+
+  // Data for charts
+  const urlStatusData = [
+    { name: 'Active URLs', value: totalActiveUrls, color: '#4caf50' },
+    { name: 'Inactive URLs', value: inactiveUrls, color: '#ff9800' },
+  ];
+
+  const quotaData = [
+    { name: 'Used', value: quotaUsed, color: '#2d8659' },
+    { name: 'Remaining', value: remainingQuota, color: '#e0e0e0' },
+  ];
+
+  const statsData = [
+    { name: 'Total URLs', value: totalUrls },
+    { name: 'Active URLs', value: totalActiveUrls },
+    { name: 'Total Visits', value: totalVisits },
+    { name: 'Quota Used', value: quotaUsed },
+  ];
 
   return (
     <Box
@@ -84,167 +98,183 @@ const Analytics = () => {
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
           }}
         >
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-            <Typography 
-              variant="h4" 
-              sx={{ 
-                fontWeight: 700,
-                color: '#1a472a',
-              }}
-            >
-              Analytics Dashboard
-            </Typography>
-            <FormControl sx={{ minWidth: 120 }}>
-              <InputLabel>Time Range</InputLabel>
-              <Select
-                value={timeRange}
-                label="Time Range"
-                onChange={(e) => setTimeRange(e.target.value)}
-                sx={{
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#2d8659',
-                  },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#1a472a',
-                  },
-                }}
-              >
-                <MenuItem value="24h">Last 24 Hours</MenuItem>
-                <MenuItem value="7d">Last 7 Days</MenuItem>
-                <MenuItem value="30d">Last 30 Days</MenuItem>
-                <MenuItem value="90d">Last 90 Days</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
+          <Typography 
+            variant="h4" 
+            sx={{ 
+              fontWeight: 700,
+              color: '#1a472a',
+              mb: 4,
+              textAlign: 'center'
+            }}
+          >
+            Analytics Dashboard
+          </Typography>
 
+          {/* Main Stats Cards */}
           <Grid container spacing={3} sx={{ mb: 4 }}>
-            <Grid item xs={12} md={4}>
-              <Card sx={{ borderRadius: 2 }}>
-                <CardContent>
-                  <Typography color="textSecondary" gutterBottom>
-                    Total Clicks
+            <Grid item xs={12} md={3}>
+              <Card sx={{ borderRadius: 2, height: '100%' }}>
+                <CardContent sx={{ textAlign: 'center' }}>
+                  <Typography color="textSecondary" gutterBottom variant="h6">
+                    Total URLs
                   </Typography>
-                  <Typography variant="h4" sx={{ color: '#1a472a', fontWeight: 600 }}>
-                    {totalClicks}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Card sx={{ borderRadius: 2 }}>
-                <CardContent>
-                  <Typography color="textSecondary" gutterBottom>
-                    Unique Visitors
-                  </Typography>
-                  <Typography variant="h4" sx={{ color: '#1a472a', fontWeight: 600 }}>
-                    {uniqueVisitors}
+                  <Typography variant="h3" sx={{ color: '#1a472a', fontWeight: 700 }}>
+                    {totalUrls}
                   </Typography>
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} md={4}>
-              <Card sx={{ borderRadius: 2 }}>
-                <CardContent>
-                  <Typography color="textSecondary" gutterBottom>
-                    Average Clicks per URL
+            <Grid item xs={12} md={3}>
+              <Card sx={{ borderRadius: 2, height: '100%' }}>
+                <CardContent sx={{ textAlign: 'center' }}>
+                  <Typography color="textSecondary" gutterBottom variant="h6">
+                    Active URLs
                   </Typography>
-                  <Typography variant="h4" sx={{ color: '#1a472a', fontWeight: 600 }}>
-                    {averageClicks.toFixed(1)}
+                  <Typography variant="h3" sx={{ color: '#4caf50', fontWeight: 700 }}>
+                    {totalActiveUrls}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <Card sx={{ borderRadius: 2, height: '100%' }}>
+                <CardContent sx={{ textAlign: 'center' }}>
+                  <Typography color="textSecondary" gutterBottom variant="h6">
+                    Total Visits
+                  </Typography>
+                  <Typography variant="h3" sx={{ color: '#2d8659', fontWeight: 700 }}>
+                    {totalVisits.toLocaleString()}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <Card sx={{ borderRadius: 2, height: '100%' }}>
+                <CardContent sx={{ textAlign: 'center' }}>
+                  <Typography color="textSecondary" gutterBottom variant="h6">
+                    Avg Visits/URL
+                  </Typography>
+                  <Typography variant="h3" sx={{ color: '#1a472a', fontWeight: 700 }}>
+                    {averageVisitsPerUrl}
                   </Typography>
                 </CardContent>
               </Card>
             </Grid>
           </Grid>
 
+          {/* Quota Usage Card */}
+          <Grid container spacing={3} sx={{ mb: 4 }}>
+            <Grid item xs={12}>
+              <Card sx={{ borderRadius: 2 }}>
+                <CardContent>
+                  <Typography variant="h6" sx={{ color: '#1a472a', mb: 2 }}>
+                    Quota Usage
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Typography variant="h4" sx={{ color: '#2d8659', fontWeight: 600, mr: 2 }}>
+                      {quotaUsed} / {quotaLimit}
+                    </Typography>
+                    <Typography variant="body1" color="textSecondary">
+                      ({quotaUsagePercentage.toFixed(1)}% used)
+                    </Typography>
+                  </Box>
+                  <LinearProgress
+                    variant="determinate"
+                    value={quotaUsagePercentage}
+                    sx={{
+                      height: 10,
+                      borderRadius: 5,
+                      backgroundColor: '#e0e0e0',
+                      '& .MuiLinearProgress-bar': {
+                        backgroundColor: quotaUsagePercentage > 80 ? '#f44336' : '#2d8659',
+                        borderRadius: 5,
+                      },
+                    }}
+                  />
+                  <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                    {remainingQuota} URLs remaining
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+
+          {/* Charts */}
           <Grid container spacing={3}>
-            <Grid item xs={12} md={8}>
+            {/* URL Status Distribution */}
+            <Grid item xs={12} md={6}>
               <Paper sx={{ p: 3, borderRadius: 2 }}>
                 <Typography variant="h6" sx={{ mb: 2, color: '#1a472a' }}>
-                  Clicks Over Time
+                  URL Status Distribution
                 </Typography>
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={clicksByDay}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
+                  <PieChart>
+                    <Pie
+                      data={urlStatusData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      label={({ name, value, percent }) => 
+                        `${name}: ${value} (${(percent * 100).toFixed(0)}%)`
+                      }
+                    >
+                      {urlStatusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
                     <Tooltip />
                     <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="clicks"
-                      stroke="#2d8659"
-                      strokeWidth={2}
-                      dot={{ fill: '#1a472a' }}
-                    />
-                  </LineChart>
+                  </PieChart>
                 </ResponsiveContainer>
               </Paper>
             </Grid>
-            <Grid item xs={12} md={4}>
+
+            {/* Quota Usage Pie Chart */}
+            <Grid item xs={12} md={6}>
               <Paper sx={{ p: 3, borderRadius: 2 }}>
                 <Typography variant="h6" sx={{ mb: 2, color: '#1a472a' }}>
-                  Top URLs
+                  Quota Usage Breakdown
                 </Typography>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={topUrls}>
+                  <PieChart>
+                    <Pie
+                      data={quotaData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      label={({ name, value, percent }) => 
+                        `${name}: ${value} (${(percent * 100).toFixed(0)}%)`
+                      }
+                    >
+                      {quotaData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </Paper>
+            </Grid>
+
+            {/* Stats Overview Bar Chart */}
+            <Grid item xs={12}>
+              <Paper sx={{ p: 3, borderRadius: 2 }}>
+                <Typography variant="h6" sx={{ mb: 2, color: '#1a472a' }}>
+                  Statistics Overview
+                </Typography>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={statsData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="short_code" />
+                    <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="clicks" fill="#2d8659" />
+                    <Bar dataKey="value" fill="#2d8659" />
                   </BarChart>
-                </ResponsiveContainer>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 3, borderRadius: 2 }}>
-                <Typography variant="h6" sx={{ mb: 2, color: '#1a472a' }}>
-                  Clicks by Country
-                </Typography>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={clicksByCountry}
-                      dataKey="clicks"
-                      nameKey="country"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      label
-                    >
-                      {clicksByCountry.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 3, borderRadius: 2 }}>
-                <Typography variant="h6" sx={{ mb: 2, color: '#1a472a' }}>
-                  Clicks by Device
-                </Typography>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={clicksByDevice}
-                      dataKey="clicks"
-                      nameKey="device"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      label
-                    >
-                      {clicksByDevice.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
                 </ResponsiveContainer>
               </Paper>
             </Grid>
@@ -255,4 +285,4 @@ const Analytics = () => {
   );
 };
 
-export default Analytics; 
+export default Analytics;

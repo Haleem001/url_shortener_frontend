@@ -62,7 +62,7 @@ const Layout = ({ children }) => {
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'URLs', icon: <LinkIcon />, path: '/urls' },
-    { text: 'Analytics', icon: <AnalyticsIcon />, path: '/analytics' },
+    // { text: 'Analytics', icon: <AnalyticsIcon />, path: '/analytics' },
   ];
 
   const drawer = (
@@ -126,7 +126,7 @@ const Layout = ({ children }) => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            URL Shortener
+          Link Trimify
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <IconButton
@@ -160,12 +160,12 @@ const Layout = ({ children }) => {
                 },
               }}
             >
-              <MenuItem onClick={handleProfileClick}>
+              {/* <MenuItem onClick={handleProfileClick}>
                 <ListItemIcon>
                   <PersonIcon fontSize="small" />
                 </ListItemIcon>
                 Profile
-              </MenuItem>
+              </MenuItem> */}
               <MenuItem onClick={handleLogout}>
                 <ListItemIcon>
                   <LogoutIcon fontSize="small" />
