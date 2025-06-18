@@ -67,7 +67,7 @@ const LandingPage = () => {
     {
       icon: <AnalyticsIcon sx={{ fontSize: 40, color: '#2d8659' }} />,
       title: 'Analytics',
-      description: 'Get detailed insights about your URL clicks and visitors',
+      description: 'Get insights about your URL visits',
     },
     {
       icon: <SecurityIcon sx={{ fontSize: 40, color: '#2d8659' }} />,
