@@ -400,7 +400,7 @@ const LandingPage = () => {
         <QRCodeModal
           open={showQRCode}
           onClose={() => setShowQRCode(false)}
-          url={shortenedUrl}
+          shortUrl={shortenedUrl}
         />
       )}
     </Box>
